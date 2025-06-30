@@ -24,12 +24,32 @@ function showRandomQuote() {
 }
 
 
-function addQuote() {
-  const textInput = document.getElementById("newQuoteText");
-  const categoryInput = document.getElementById("newQuoteCategory");
+// Function to create the quote form dynamically
+function createAddQuoteForm() {
+  const formContainer = document.createElement('div');
 
-  const newText = textInput.value.trim();
-  const newCategory = categoryInput.value.trim();
+  const textInput = document.createElement('input');
+  textInput.id = 'newQuoteText';
+  textInput.placeholder = 'Enter a new quote';
+  formContainer.appendChild(textInput);
+
+  const categoryInput = document.createElement('input');
+  categoryInput.id = 'newQuoteCategory';
+  categoryInput.placeholder = 'Enter quote category';
+  formContainer.appendChild(categoryInput);
+
+  const addButton = document.createElement('button');
+  addButton.id = 'addQuoteBtn';
+  addButton.textContent = 'Add Quote';
+  formContainer.appendChild(addButton);
+
+  document.body.appendChild(formContainer);
+}
+
+// Function to add a quote
+function addQuote() {
+  const newText = document.getElementById("newQuoteText").value.trim();
+  const newCategory = document.getElementById("newQuoteCategory").value.trim();
 
   if (!newText || !newCategory) {
     alert("Please enter both a quote and category.");
@@ -37,13 +57,14 @@ function addQuote() {
   }
 
   quotes.push({ text: newText, category: newCategory });
-  textInput.value = "";
-  categoryInput.value = "";
-  displayRandomQuote();
+  document.getElementById("newQuoteText").value = '';
+  document.getElementById("newQuoteCategory").value = '';
+  showRandomQuote();
 }
 
-// Add event listeners after DOM is fully loaded
-document.addEventListener("DOMContentLoaded", function () {
-  document.getElementById("newQuote").addEventListener("click", displayRandomQuote);
+// Initialize after DOM is loaded
+document.addEventListener("DOMContentLoaded", () => {
+  createAddQuoteForm();
+  document.getElementById("newQuote").addEventListener("click", showRandomQuote);
   document.getElementById("addQuoteBtn").addEventListener("click", addQuote);
 });
