@@ -126,10 +126,12 @@ function addQuote() {
 async function fetchQuotesFromServer() {
   try {
     // Simulated server response (replace with fetch if using real API)
-    const simulatedServerQuotes = [
-      { text: "Push yourself, no one else will do it for you.", category: "Motivation" },
-      { text: "Make it simple, but significant.", category: "Design" }
-    ];
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+    const data = await response.json();
+    const simulatedServerQuotes = data.slice(0, 5).map(post => ({
+  text: post.title,
+  category: "API"
+}));
 
     const serverData = JSON.stringify(simulatedServerQuotes);
     const localData = JSON.stringify(quotes);
