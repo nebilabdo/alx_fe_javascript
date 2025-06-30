@@ -4,12 +4,25 @@ let quotes = [
   { text: "The only limit is your mind.", category: "Mindset" }
 ];
 
-function displayRandomQuote()  {
-  const randomIndex = Math.floor(Math.random() * quotes.length);
-  const quote = quotes[randomIndex];
-  const quoteDisplay = document.getElementById("quoteDisplay");
-  quoteDisplay.textContent = `"${quote.text}" - ${quote.category}`;
+function showRandomQuote() {
+  const selectedCategory = categoryFilter.value;
+  let filteredQuotes = quotes;
+
+  if (selectedCategory !== 'all') {
+    filteredQuotes = quotes.filter(q => q.category === selectedCategory);
+  }
+
+  if (filteredQuotes.length === 0) {
+    quoteDisplay.innerHTML = "No quotes available for this category.";
+    return;
+  }
+
+  const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
+  const quote = filteredQuotes[randomIndex];
+  quoteDisplay.innerHTML = `"${quote.text}" - ${quote.category}`;
+  sessionStorage.setItem('lastQuote', JSON.stringify(quote));
 }
+
 
 function addQuote() {
   const textInput = document.getElementById("newQuoteText");
