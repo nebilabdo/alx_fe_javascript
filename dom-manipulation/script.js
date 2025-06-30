@@ -4,7 +4,7 @@ let quotes = [
   { text: "The only limit is your mind.", category: "Mindset" }
 ];
 
-function showRandomQuote()  {
+function displayRandomQuote()  {
   const randomIndex = Math.floor(Math.random() * quotes.length);
   const quote = quotes[randomIndex];
   const quoteDisplay = document.getElementById("quoteDisplay");
