@@ -141,7 +141,7 @@ async function fetchQuotesFromServer() {
       saveQuotes();
       populateCategories();
       showRandomQuote();
-      notify("Quotes synced with server. Server data used to resolve conflicts.");
+     notify("Quotes synced with server!");
     } else {
       notify("No new updates from server.");
     }
