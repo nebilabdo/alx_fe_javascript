@@ -149,6 +149,52 @@ async function fetchQuotesFromServer() {
     console.error("Server sync failed:", err);
     notify("Error syncing with server.");
   }
+// POST local quotes to mock server
+async function postQuotesToServer() {
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(quotes)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Server responded with status ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log("Successfully posted quotes to server:", result);
+    notify("Local quotes synced to server.");
+  } catch (err) {
+    console.error("Failed to post quotes:", err);
+    notify("Error syncing quotes to server.");
+  }
+}
+
+// Modify addQuote to POST after adding locally
+function addQuote() {
+  const newText = document.getElementById("newQuoteText").value.trim();
+  const newCategory = document.getElementById("newQuoteCategory").value.trim();
+
+  if (!newText || !newCategory) {
+    alert("Please enter both a quote and category.");
+    return;
+  }
+
+  quotes.push({ text: newText, category: newCategory });
+  saveQuotes();
+  populateCategories();
+  showRandomQuote();
+
+  document.getElementById("newQuoteText").value = '';
+  document.getElementById("newQuoteCategory").value = '';
+  notify("New quote added.");
+
+  // POST the updated quotes to server after adding a new quote
+  postQuotesToServer();
+}
 }
 
 // Initialize on load
