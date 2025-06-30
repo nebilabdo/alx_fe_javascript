@@ -196,6 +196,68 @@ function addQuote() {
   postQuotesToServer();
 }
 }
+async function syncQuotes() {
+  try {
+    // 1. Fetch quotes from server (GET)
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+    if (!response.ok) throw new Error(`Server error: ${response.status}`);
+    const serverDataRaw = await response.json();
+
+    // Map server data to your quotes format
+    const serverQuotes = serverDataRaw.slice(0, 5).map(post => ({
+      text: post.title,
+      category: "API"
+    }));
+
+    const localQuotesJSON = JSON.stringify(quotes);
+    const serverQuotesJSON = JSON.stringify(serverQuotes);
+
+    // 2. Conflict resolution: if server data differs, replace local data
+    if (localQuotesJSON !== serverQuotesJSON) {
+      // Example strategy: prioritize server data on conflict
+      quotes = serverQuotes;
+      saveQuotes();
+      populateCategories();
+      showRandomQuote();
+      notify("Quotes synced with server. Server data used to resolve conflicts.");
+    } else {
+      notify("No new updates from server.");
+    }
+
+    // Optional: post local changes back if needed
+    // await postQuotesToServer();
+
+  } catch (error) {
+    console.error("Failed to sync quotes:", error);
+    notify("Error syncing with server.");
+  }
+}
+
+// Initialize and periodically sync
+document.addEventListener("DOMContentLoaded", () => {
+  createAddQuoteForm();
+  populateCategories();
+
+  const showBtn = document.createElement("button");
+  showBtn.id = "newQuote";
+  showBtn.textContent = "Show New Quote";
+  showBtn.onclick = showRandomQuote;
+  document.body.insertBefore(showBtn, quoteDisplay);
+
+  document.getElementById("addQuoteBtn").addEventListener("click", () => {
+    addQuote();
+    // Optionally sync after adding a quote
+    syncQuotes();
+  });
+
+  showRandomQuote();
+
+  // Initial sync
+  syncQuotes();
+
+  // Periodically check for new quotes every 30 seconds
+  setInterval(syncQuotes, 30000);
+});
 
 // Initialize on load
 document.addEventListener("DOMContentLoaded", () => {
