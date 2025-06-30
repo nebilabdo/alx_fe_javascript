@@ -6,14 +6,34 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
 
 const quoteDisplay = document.getElementById("quoteDisplay");
 
-// Create and append category filter dropdown
+// Create category filter dropdown
 const categoryFilter = document.createElement("select");
 categoryFilter.id = "categoryFilter";
 categoryFilter.innerHTML = `<option value="all">All Categories</option>`;
 categoryFilter.onchange = filterQuotes;
 document.body.insertBefore(categoryFilter, quoteDisplay);
 
-// Function to populate unique categories in the dropdown
+// Notification element
+const notification = document.createElement("div");
+notification.id = "notification";
+notification.style.display = "none";
+notification.style.background = "#e6f7ff";
+notification.style.borderLeft = "4px solid #007bff";
+notification.style.padding = "10px";
+notification.style.margin = "10px 0";
+notification.style.color = "#333";
+document.body.insertBefore(notification, categoryFilter);
+
+// Show notification
+function notify(message) {
+  notification.textContent = message;
+  notification.style.display = "block";
+  setTimeout(() => {
+    notification.style.display = "none";
+  }, 4000);
+}
+
+// Populate categories
 function populateCategories() {
   const categories = [...new Set(quotes.map(q => q.category))];
   categoryFilter.innerHTML = `<option value="all">All Categories</option>`;
@@ -25,12 +45,10 @@ function populateCategories() {
   });
 
   const lastSelected = localStorage.getItem("selectedCategory");
-  if (lastSelected) {
-    categoryFilter.value = lastSelected;
-  }
+  if (lastSelected) categoryFilter.value = lastSelected;
 }
 
-// Function to show a quote randomly based on filter
+// Display random quote based on selected category
 function showRandomQuote() {
   const selectedCategory = categoryFilter.value;
   let filteredQuotes = quotes;
@@ -50,14 +68,19 @@ function showRandomQuote() {
   sessionStorage.setItem("lastQuote", JSON.stringify(quote));
 }
 
-// Filter quotes and store filter preference
+// Save to localStorage
+function saveQuotes() {
+  localStorage.setItem("quotes", JSON.stringify(quotes));
+}
+
+// Filter quotes
 function filterQuotes() {
   const selected = categoryFilter.value;
   localStorage.setItem("selectedCategory", selected);
   showRandomQuote();
 }
 
-// Function to create the quote form dynamically
+// Create form to add quotes
 function createAddQuoteForm() {
   const formContainer = document.createElement('div');
 
@@ -79,7 +102,7 @@ function createAddQuoteForm() {
   document.body.appendChild(formContainer);
 }
 
-// Function to add a quote
+// Add new quote
 function addQuote() {
   const newText = document.getElementById("newQuoteText").value.trim();
   const newCategory = document.getElementById("newQuoteCategory").value.trim();
@@ -90,16 +113,43 @@ function addQuote() {
   }
 
   quotes.push({ text: newText, category: newCategory });
-  localStorage.setItem("quotes", JSON.stringify(quotes));
+  saveQuotes();
+  populateCategories();
+  showRandomQuote();
 
   document.getElementById("newQuoteText").value = '';
   document.getElementById("newQuoteCategory").value = '';
-
-  populateCategories();
-  showRandomQuote();
+  notify("New quote added.");
 }
 
-// DOM load events
+// Simulate fetching from server (mock data)
+async function fetchQuotesFromServer() {
+  try {
+    // Simulated server response (replace with fetch if using real API)
+    const simulatedServerQuotes = [
+      { text: "Push yourself, no one else will do it for you.", category: "Motivation" },
+      { text: "Make it simple, but significant.", category: "Design" }
+    ];
+
+    const serverData = JSON.stringify(simulatedServerQuotes);
+    const localData = JSON.stringify(quotes);
+
+    if (localData !== serverData) {
+      quotes = simulatedServerQuotes;
+      saveQuotes();
+      populateCategories();
+      showRandomQuote();
+      notify("Quotes synced with server. Server data used to resolve conflicts.");
+    } else {
+      notify("No new updates from server.");
+    }
+  } catch (err) {
+    console.error("Server sync failed:", err);
+    notify("Error syncing with server.");
+  }
+}
+
+// Initialize on load
 document.addEventListener("DOMContentLoaded", () => {
   createAddQuoteForm();
   populateCategories();
@@ -112,4 +162,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("addQuoteBtn").addEventListener("click", addQuote);
   showRandomQuote();
+  fetchQuotesFromServer(); // initial fetch
+  setInterval(fetchQuotesFromServer, 30000); // sync every 30s
 });
